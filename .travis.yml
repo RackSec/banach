@@ -6,9 +6,12 @@ cache:
   - "$HOME/.lein"
   - "$HOME/.m2"
 script:
-  - lein cljfmt check
-  - lein test
-  - lein ancient
+- lein cljfmt check
+- lein test
+- lein ancient
 after_success:
-  - CLOVERAGE_VERSION=1.0.7-SNAPSHOT lein cloverage --codecov
-  - bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov.json
+- CLOVERAGE_VERSION=1.0.7-SNAPSHOT lein cloverage --codecov
+- bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov.json
+notifications:
+  slack:
+    secure: P/1fzAPq1Yw27I31RU8N9f0hglYYGjxnxvI33AGhBsVMyQohDkNTIc7Ua7IhXhJK5L+B8zZmX9cqCrwJ6jhGQhCJpZsjsqxg11BUbYKVqPr5oXK+RsRnyWlUV3LCMTL1MgVuRWDooH6itqFmjcYu1rTOjdlP9qNmWFCYxWWc5rsPoJvzxQ/P7PGB/pGsXTd2XslHzUfki0Un8/QVR+ujmcHR6dFYnzaiKpOO/UXdopYiDqxkKpcrJn49BI+40zj681wBxzSwVCd+8s1X/HHWVZSvCyP+FoHKCeqLFRQs9MguLv0Huis20wf9m4HfKu8yTDzqGh/swFQ+cCv8rZgJfIlYVfrKy80CYKXqQL9JRTKi+pVkQ9ixgmxD72P+alNmr066ApR1/7Oz2LkreKrF+uMBk0IohNTkTixdH1dokd6P3nMofeq7iO4Bub0n8Cz3aTTt/vfN67+yP/5TSE+v90ANqbgY8W4WsrIMXD4HpjdukbiPOKvw0TQ8+2hArpxc1d6amauVxgSedm49AixtIrL2yMGnQV4spH5Pb7nfnTf+lG8oPRzLxzb27bzOkF/B0Sk2OQGDWadsVrxcshc+OuGyPfzC/Oo8JwsyK5J3ULPRo4OYSIPrJ6m5evgXu15MUb1+DWF7rIprFdmEyT3cPuIG52yxAF6QbtGneL4Po0c=
