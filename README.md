@@ -1,5 +1,9 @@
 # Banach
 
+[![Build Status](https://travis-ci.org/RackSec/banach.svg?branch=master)](https://travis-ci.org/RackSec/banach)
+[![codecov](https://codecov.io/gh/RackSec/banach/branch/master/graph/badge.svg)](https://codecov.io/gh/RackSec/banach)
+
+
 This contains utilities that can be useful when working with [Manifold](https://github.com/ztellman/manifold).
 
 At the moment the library provides a way to create retry functions for deferred
