@@ -64,10 +64,9 @@
     (let [c (mt/mock-clock)
           attempts (atom 0)
           p 4
-          exc "explosion"
           f (fn []
               (swap! attempts inc)
-              (md/error-deferred (Exception. exc)))
+              (md/error-deferred (Exception. "explosion")))
           stop 3]
       (mt/with-clock c
         (let [log (use-atom-log-appender!)
