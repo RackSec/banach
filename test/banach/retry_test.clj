@@ -3,7 +3,6 @@
             [manifold.deferred :as md]
             [manifold.time :as mt]
             [clojure.math.numeric-tower :as math]
-            [banach.test-utils :refer [use-atom-log-appender!]]
             [banach.retry :as retry]))
 
 (deftest exponentially-tests
@@ -69,8 +68,7 @@
               (md/error-deferred (Exception. "explosion")))
           stop 3]
       (mt/with-clock c
-        (let [log (use-atom-log-appender!)
-              ret (retry/retry-exp-backoff f p stop)]
+        (let [ret (retry/retry-exp-backoff f p stop)]
           (is (= 1 @attempts))
 
           (mt/advance c (mt/seconds p))
