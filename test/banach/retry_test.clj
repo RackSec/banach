@@ -8,10 +8,12 @@
 
 (deftest exponentially-tests
   (testing "returns a function that will raise the wait period to the number of failures"
-    (let [f (#'retry/exponentially 10)]
-      (is (= 1 (f [])))
-      (is (= 10 (f [:a])))
-      (is (= 1000 (f [:a :b :c]))))))
+    (let [c (mt/mock-clock)
+          f (#'retry/exponentially 10)]
+      (mt/with-clock c
+        (is (= 1 (f [])))
+        (is (= 10 (f [:a])))
+        (is (= 1000 (f [:a :b :c])))))))
 
 (deftest up-to-tests
   (testing "raises most recent exception when number of tries exceeded"
