@@ -5,11 +5,8 @@
    [manifold.time :as mt]))
 
 (defn ^:private exponentially
-  "Returns a function that when evaluated will produce the initial wait
-  raised to the number of failures.
-
-  This is intended to be used in conjunction with 1-arg combinators that take a
-  vector of failures."
+  "Returns a strategy that causes an exponentially increasing wait before
+  retrying."
   [wait]
   (fn [failures]
     (math/expt wait (count failures))))
