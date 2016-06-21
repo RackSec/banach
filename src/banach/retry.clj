@@ -24,12 +24,11 @@
   each try.
 
   f -  a function that should be retried; must return a deferred
-
-  strategy - a retry strategy, which takes a retry context and returns
-      a (potentially deferred) retry context or exception. If an exception
-      is raised, retrying stops and the exception is passed on to the
-      deferred returned by this fn. Otherwise, continues execution with
-      the given retry context.
+  strategy - a retry strategy, which takes a deferred retry context and
+      returns a deferred retry context, deferred with an exception, or a
+      synchronous exception. In the error case, retrying stops and the
+      exception is passed on to the deferred returned by this fn. Otherwise,
+      continues execution with the given retry context.
 
   Returns a deferred wrapping the results of `f`."
   [f strategy]
