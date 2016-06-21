@@ -21,8 +21,8 @@
   2) throw an exception because the maximum number of retries, `stop`, has
   been reached.
 
-  This is intended to be used in conjunction with 1-arg combinators that take a
-  vector of failures."
+  This is intended to be used in conjunction with 1-arg combinators
+  that take a vector of failures."
   [stop retry?]
   (fn [failures]
     (if (< (count failures) stop)
