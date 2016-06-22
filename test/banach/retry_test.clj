@@ -46,18 +46,17 @@
   (testing "retries calling f"
     (let [c (mt/mock-clock)
           attempts (atom 0)
-          strategy (fn [{:keys [failures]}]
+          strategy (fn [{:keys [failures] :as ctx}]
                      (swap! attempts inc)
                      ;; allow one failure, then explode
                      (if (= (count failures) 1)
-                       2
+                       (mt/in (mt/seconds 1) #(md/success-deferred ctx))
                        (throw (last failures))))
           f #(md/error-deferred (Exception. "I've failed you"))]
       (mt/with-clock c
         (let [ret (#'retry/retry f strategy)]
           (is (= 1 @attempts))
-
-          (mt/advance c (mt/seconds 2))
+          (mt/advance c (mt/seconds 1))
           (is (= 2 @attempts))
           (is (thrown-with-msg? Exception #"I've failed you" @ret)))))))
 
