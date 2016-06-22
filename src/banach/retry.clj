@@ -38,7 +38,7 @@
   (md/loop [ctx {:failures []}]
     (md/catch
      (f)
-      (fn [e] (md/chain (update ctx :failures conj e) strategy md/recur)))))
+     (fn [e] (md/chain (update ctx :failures conj e) strategy md/recur)))))
 
 (defn retry-exp-backoff
   "Takes a function that returns a `manifold.deferred/deferred`. Retries that
