@@ -14,7 +14,8 @@
       (mt/in delay-ms #(md/success-deferred ctx)))))
 
 (defn ^:private up-to
-  "Returns a strategy that allows up to n retries. "
+  "Returns a strategy that allows up to `stop` retries, otherwise
+  raises the last exception."
   [stop]
   (fn [d]
     (md/let-flow [{:keys [failures] :as ctx} d]
