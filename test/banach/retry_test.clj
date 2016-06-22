@@ -25,18 +25,15 @@
 
 (deftest up-to-tests
   (testing "raises most recent exception when number of tries exceeded"
-    (let [tries [(Exception. "earlier")
-                 (Exception. "recent")]
-          stop 2
-          retry? #(throw (Exception. "I shouldn't have been called"))
-          f (#'retry/up-to stop retry?)]
-      (is (thrown-with-msg? Exception #"recent" (f tries)))))
-  (testing "returns the result of retry when number of tries less than max"
-    (let [tries []
-          retry? (constantly :success)
-          stop 2
-          f (#'retry/up-to stop retry?)]
-      (is (= :success (f tries))))))
+    (let [ctx {:failuers [(Exception. "earlier") (Exception. "recent")]}
+          strategy (#'retry/up-to 2)]
+      (is (thrown-with-msg?
+           Exception #"recent"
+           @(strategy (md/success-deferred ctx))))))
+  (testing "returns the ctx when tries remaining"
+    (let [ctx {:failures []}
+          strategy (#'retry/up-to 2)]
+      (is (= ctx @(strategy ctx))))))
 
 (deftest retry-tests
   (testing "retry returns the result of f on success"
