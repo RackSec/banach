@@ -12,7 +12,7 @@
           delay-is (fn [delay failures]
                      (let [ctx {:failures failures}
                            d (strategy (md/success-deferred ctx))
-                           delay-ms (* 1000 delay)]
+                           delay-ms (mt/seconds delay)]
                        (is (not (md/realized? d)))
                        (mt/advance c (dec delay-ms))
                        (is (not (md/realized? d)))

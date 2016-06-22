@@ -10,7 +10,7 @@
   [wait]
   (fn [d]
     (md/let-flow [{:keys [failures] :as ctx} d
-                  delay-ms (* 1000 (math/expt wait (count failures)))]
+                  delay-ms (mt/seconds (math/expt wait (count failures)))]
       (mt/in delay-ms #(md/success-deferred ctx)))))
 
 (defn ^:private up-to
