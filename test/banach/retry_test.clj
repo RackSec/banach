@@ -6,7 +6,7 @@
             [banach.retry :as retry]))
 
 (deftest exponentially-tests
-  (testing "returns a function that will raise the wait period to the number of failures"
+  (testing "wait exponentially as failure count increases"
     (let [c (mt/mock-clock)
           f (#'retry/exponentially 10)
           delay-is (fn [delay x] (is (= delay x)))]
