@@ -8,8 +8,10 @@
   "Returns a strategy that causes an exponentially increasing wait before
   retrying. The base wait is measured in seconds."
   [wait]
-  (fn [failures]
-    (math/expt wait (count failures))))
+  (fn [d]
+    (md/let-flow [{:keys [failures] :as ctx} d
+                  delay-ms (* 1000 (math/expt wait (count failures)))]
+      (mt/in delay-ms #(md/success-deferred ctx)))))
 
 (defn ^:private up-to
   [stop retry?]
