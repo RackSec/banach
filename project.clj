@@ -12,4 +12,6 @@
             [lein-pprint "1.1.1"]
             [lein-environ "1.0.2"]
             [lein-ancient "0.6.10"]
-            [lein-cloverage "1.0.7-SNAPSHOT"]])
+            [lein-cloverage "1.0.7-SNAPSHOT"]]
+  :cljfmt {:indents {let-flow [[:inner 0]]
+                     catch [[:inner 0]]}})

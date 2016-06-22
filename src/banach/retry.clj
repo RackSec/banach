@@ -5,52 +5,43 @@
    [manifold.time :as mt]))
 
 (defn ^:private exponentially
-  "Returns a function that when evaluated will produce the initial wait
-  raised to the number of failures.
-
-  This is intended to be used in conjunction with 1-arg combinators that take a
-  vector of failures."
+  "Returns a strategy that causes an exponentially increasing wait before
+  retrying. The base wait is measured in seconds."
   [wait]
-  (fn [failures]
-    (math/expt wait (count failures))))
+  (fn [d]
+    (md/let-flow [{:keys [failures] :as ctx} d
+                  delay-ms (mt/seconds (math/expt wait (count failures)))]
+      (mt/in delay-ms #(md/success-deferred ctx)))))
 
 (defn ^:private up-to
-  "Returns a function that when evaluated will either
-
-  1) return a number to use to wait until retrying a function again. Or,
-  2) throw an exception because the maximum number of retries, `stop`, has
-  been reached.
-
-  This is intended to be used in conjunction with 1-arg combinators that take a
-  vector of failures."
-  [stop retry?]
-  (fn [failures]
-    (if (< (count failures) stop)
-      (retry? failures)
-      (throw (last failures)))))
+  "Returns a strategy that allows up to `stop` retries, otherwise
+  raises the last exception."
+  [stop]
+  (fn [d]
+    (md/let-flow [{:keys [failures] :as ctx} d]
+      (if (< (count failures) stop)
+        ctx
+        (throw (last failures))))))
 
 (defn ^:private retry
   "Retry a function multiple times, pausing for a number of seconds between
   each try.
 
   f -  a function that should be retried; must return a deferred
-
-  strategy - a retry strategy, which takes a retry context and returns
-      a (potentially deferred) retry context or exception. If an exception
-      is raised, retrying stops and the exception is passed on to the
-      deferred returned by this fn. Otherwise, continues execution with
-      the given retry context.
+  strategy - a retry strategy, which takes a deferred retry context and
+      returns a deferred retry context, deferred with an exception, or a
+      synchronous exception. In the error case, retrying stops and the
+      exception is passed on to the deferred returned by this fn. Otherwise,
+      continues execution with the given retry context.
 
   Returns a deferred wrapping the results of `f`."
   [f strategy]
-  (md/loop [failures []]
+  (md/loop [ctx {:failures []}]
     (md/catch
      (f)
-     Exception
-      (fn [exc]
-        (let [all-failures (conj failures exc)
-              wait (strategy all-failures)]
-          (mt/in (mt/seconds wait) #(md/recur all-failures)))))))
+     (fn [e]
+       (let [ctx (update ctx :failures conj e)]
+         (md/chain (strategy ctx) md/recur))))))
 
 (defn retry-exp-backoff
   "Takes a function that returns a `manifold.deferred/deferred`. Retries that
@@ -68,5 +59,4 @@
 
   Returns a deferred wrapping the results of `f`."
   [f p stop]
-  (retry f (->> (exponentially p)
-                (up-to stop))))
+  (retry f (comp (exponentially p) (up-to stop))))

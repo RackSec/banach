@@ -6,55 +6,57 @@
             [banach.retry :as retry]))
 
 (deftest exponentially-tests
-  (testing "returns a function that will raise the wait period to the number of failures"
+  (testing "wait exponentially as failure count increases"
     (let [c (mt/mock-clock)
-          f (#'retry/exponentially 10)
-          delay-is (fn [delay x] (is (= delay x)))]
+          strategy (#'retry/exponentially 10)
+          delay-is (fn [delay failures]
+                     (let [ctx {:failures failures}
+                           d (strategy (md/success-deferred ctx))
+                           delay-ms (mt/seconds delay)]
+                       (is (not (md/realized? d)))
+                       (mt/advance c (dec delay-ms))
+                       (is (not (md/realized? d)))
+                       (mt/advance c 1)
+                       (is (md/realized? d))))]
       (mt/with-clock c
-        (delay-is 1 (f []))
-        (delay-is 10 (f [:a]))
-        (delay-is 1000 (f [:a :b :c]))))))
+        (delay-is 1 [])
+        (delay-is 10 [:a])
+        (delay-is 1000 [:a :b :c])))))
 
 (deftest up-to-tests
   (testing "raises most recent exception when number of tries exceeded"
-    (let [tries [(Exception. "earlier")
-                 (Exception. "recent")]
-          stop 2
-          retry? #(throw (Exception. "I shouldn't have been called"))
-          f (#'retry/up-to stop retry?)]
-      (is (thrown-with-msg? Exception #"recent" (f tries)))))
-  (testing "returns the result of retry when number of tries less than max"
-    (let [tries []
-          retry? (constantly :success)
-          stop 2
-          f (#'retry/up-to stop retry?)]
-      (is (= :success (f tries))))))
+    (let [ctx {:failures [(Exception. "earlier") (Exception. "recent")]}
+          strategy (#'retry/up-to 2)]
+      (is (thrown-with-msg?
+           Exception #"recent"
+           @(strategy (md/success-deferred ctx))))))
+  (testing "returns the ctx when tries remaining"
+    (let [ctx {:failures []}
+          strategy (#'retry/up-to 2)]
+      (is (= ctx @(strategy ctx))))))
 
 (deftest retry-tests
   (testing "retry returns the result of f on success"
-    (let [c (mt/mock-clock)
-          called (atom false)
-          strategy (fn [_failures] (reset! called true))
+    (let [called (atom false)
+          strategy (fn [ctx] (reset! called true) ctx)
           f #(md/success-deferred :finished)
           ret (#'retry/retry f strategy)]
-      ;; no clock necessary, time won't be a factor in test.
       (is (not @called))
       (is (= :finished @ret))))
   (testing "retries calling f"
     (let [c (mt/mock-clock)
           attempts (atom 0)
-          strategy (fn [failures]
+          strategy (fn [{:keys [failures] :as ctx}]
                      (swap! attempts inc)
                      ;; allow one failure, then explode
                      (if (= (count failures) 1)
-                       2
+                       (mt/in (mt/seconds 1) #(md/success-deferred ctx))
                        (throw (last failures))))
           f #(md/error-deferred (Exception. "I've failed you"))]
       (mt/with-clock c
         (let [ret (#'retry/retry f strategy)]
           (is (= 1 @attempts))
-
-          (mt/advance c (mt/seconds 2))
+          (mt/advance c (mt/seconds 1))
           (is (= 2 @attempts))
           (is (thrown-with-msg? Exception #"I've failed you" @ret)))))))
 
