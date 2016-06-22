@@ -6,7 +6,7 @@
 
 (defn ^:private exponentially
   "Returns a strategy that causes an exponentially increasing wait before
-  retrying."
+  retrying. The base wait is measured in seconds."
   [wait]
   (fn [failures]
     (math/expt wait (count failures))))
