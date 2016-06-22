@@ -14,12 +14,13 @@
       (mt/in delay-ms #(md/success-deferred ctx)))))
 
 (defn ^:private up-to
-  [stop retry?]
-  (fn [failures]
-    (if (< (count failures) stop)
-      (retry? failures)
-      (throw (last failures)))))
   "Returns a strategy that allows up to n retries. "
+  [stop]
+  (fn [d]
+    (md/let-flow [{:keys [failures] :as ctx} d]
+      (if (< (count failures) stop)
+        ctx
+        (throw (last failures))))))
 
 (defn ^:private retry
   "Retry a function multiple times, pausing for a number of seconds between
