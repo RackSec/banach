@@ -25,7 +25,7 @@
 
 (deftest up-to-tests
   (testing "raises most recent exception when number of tries exceeded"
-    (let [ctx {:failuers [(Exception. "earlier") (Exception. "recent")]}
+    (let [ctx {:failures [(Exception. "earlier") (Exception. "recent")]}
           strategy (#'retry/up-to 2)]
       (is (thrown-with-msg?
            Exception #"recent"
