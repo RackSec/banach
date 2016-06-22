@@ -38,7 +38,6 @@
   (md/loop [ctx {:failures []}]
     (md/catch
      (f)
-     Exception
       (fn [e] (md/chain (update ctx :failures conj e) strategy md/recur)))))
 
 (defn retry-exp-backoff
