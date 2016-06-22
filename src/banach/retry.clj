@@ -35,14 +35,11 @@
 
   Returns a deferred wrapping the results of `f`."
   [f strategy]
-  (md/loop [failures []]
+  (md/loop [ctx {:failures []}]
     (md/catch
      (f)
      Exception
-      (fn [exc]
-        (let [all-failures (conj failures exc)
-              wait (strategy all-failures)]
-          (mt/in (mt/seconds wait) #(md/recur all-failures)))))))
+      (fn [e] (md/chain (update ctx :failures conj e) strategy md/recur)))))
 
 (defn retry-exp-backoff
   "Takes a function that returns a `manifold.deferred/deferred`. Retries that
