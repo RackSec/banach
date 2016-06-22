@@ -57,5 +57,4 @@
 
   Returns a deferred wrapping the results of `f`."
   [f p stop]
-  (retry f (->> (exponentially p)
-                (up-to stop))))
+  (retry f (comp (exponentially p) (up-to stop))))
