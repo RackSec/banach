@@ -37,8 +37,7 @@
 
 (deftest retry-tests
   (testing "retry returns the result of f on success"
-    (let [c (mt/mock-clock)
-          called (atom false)
+    (let [called (atom false)
           strategy (fn [ctx] (reset! called true) ctx)
           f #(md/success-deferred :finished)
           ret (#'retry/retry f strategy)]
