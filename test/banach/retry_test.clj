@@ -3,15 +3,17 @@
             [manifold.deferred :as md]
             [manifold.time :as mt]
             [clojure.math.numeric-tower :as math]
-            [banach.test-utils :refer [use-atom-log-appender!]]
             [banach.retry :as retry]))
 
 (deftest exponentially-tests
   (testing "returns a function that will raise the wait period to the number of failures"
-    (let [f (#'retry/exponentially 10)]
-      (is (= 1 (f [])))
-      (is (= 10 (f [:a])))
-      (is (= 1000 (f [:a :b :c]))))))
+    (let [c (mt/mock-clock)
+          f (#'retry/exponentially 10)
+          delay-is (fn [delay x] (is (= delay x)))]
+      (mt/with-clock c
+        (delay-is 1 (f []))
+        (delay-is 10 (f [:a]))
+        (delay-is 1000 (f [:a :b :c]))))))
 
 (deftest up-to-tests
   (testing "raises most recent exception when number of tries exceeded"
@@ -61,14 +63,12 @@
     (let [c (mt/mock-clock)
           attempts (atom 0)
           p 4
-          exc "explosion"
           f (fn []
               (swap! attempts inc)
-              (md/error-deferred (Exception. exc)))
+              (md/error-deferred (Exception. "explosion")))
           stop 3]
       (mt/with-clock c
-        (let [log (use-atom-log-appender!)
-              ret (retry/retry-exp-backoff f p stop)]
+        (let [ret (retry/retry-exp-backoff f p stop)]
           (is (= 1 @attempts))
 
           (mt/advance c (mt/seconds p))

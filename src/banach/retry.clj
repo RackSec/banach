@@ -33,11 +33,13 @@
   "Retry a function multiple times, pausing for a number of seconds between
   each try.
 
-  f - a function that should be retried; must return a
-      `manifold.deferred/deferred'
-  strategy - a function that will produce a number and takes a vector of
-      exceptions. The number of exceptions is used to record the number
-      of attempts.
+  f -  a function that should be retried; must return a deferred
+
+  strategy - a retry strategy, which takes a retry context and returns
+      a (potentially deferred) retry context or exception. If an exception
+      is raised, retrying stops and the exception is passed on to the
+      deferred returned by this fn. Otherwise, continues execution with
+      the given retry context.
 
   Returns a deferred wrapping the results of `f`."
   [f strategy]
