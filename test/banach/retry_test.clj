@@ -41,7 +41,6 @@
           strategy (fn [ctx] (reset! called true) ctx)
           f #(md/success-deferred :finished)
           ret (#'retry/retry f strategy)]
-      ;; no clock necessary, time won't be a factor in test.
       (is (not @called))
       (is (= :finished @ret))))
   (testing "retries calling f"
