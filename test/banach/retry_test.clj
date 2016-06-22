@@ -8,12 +8,20 @@
 (deftest exponentially-tests
   (testing "wait exponentially as failure count increases"
     (let [c (mt/mock-clock)
-          f (#'retry/exponentially 10)
-          delay-is (fn [delay x] (is (= delay x)))]
+          strategy (#'retry/exponentially 10)
+          delay-is (fn [delay failures]
+                     (let [ctx {:failures failures}
+                           d (strategy (md/success-deferred ctx))
+                           delay-ms (* 1000 delay)]
+                       (is (not (md/realized? d)))
+                       (mt/advance c (dec delay-ms))
+                       (is (not (md/realized? d)))
+                       (mt/advance c 1)
+                       (is (md/realized? d))))]
       (mt/with-clock c
-        (delay-is 1 (f []))
-        (delay-is 10 (f [:a]))
-        (delay-is 1000 (f [:a :b :c]))))))
+        (delay-is 1 [])
+        (delay-is 10 [:a])
+        (delay-is 1000 [:a :b :c])))))
 
 (deftest up-to-tests
   (testing "raises most recent exception when number of tries exceeded"
