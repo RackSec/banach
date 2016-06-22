@@ -48,7 +48,7 @@
   (testing "retries calling f"
     (let [c (mt/mock-clock)
           attempts (atom 0)
-          strategy (fn [failures]
+          strategy (fn [{:keys [failures]}]
                      (swap! attempts inc)
                      ;; allow one failure, then explode
                      (if (= (count failures) 1)
