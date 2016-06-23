@@ -3,8 +3,14 @@
             [manifold.deferred :as md]))
 
 (defn paginated->stream
-  "Given a resource with pagination semantics, turns it into a single
-  stream that transparently handles pagination for you."
+  "Turn a paginated collection into a stream.
+
+  `handle-todo` should take a todo item (like a URL) and return a deferred
+  that will fire with the result of fetching that information (e.g. by making
+  an HTTP request). `get-results` is passed that value from `handle-todo`, and
+  should return the results in that value. These will be added to the output
+  stream. `get-next-todo` should return the next todo or nil if this is the
+  last page. `first-todo` is the first todo item to kick this process off."
   [handle-todo first-todo get-next-todo get-results]
   (let [todo-stream (ms/stream 10)
         rsrc-stream (ms/stream 20)]
