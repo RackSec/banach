@@ -1,4 +1,4 @@
-(defproject banach "0.2.0"
+(defproject banach "0.2.1-SNAPSHOT"
   :description "Utility functions to use with manifold"
   :url "https://github.com/racksec/banach"
   :lein-release {:deploy-via :clojars}
