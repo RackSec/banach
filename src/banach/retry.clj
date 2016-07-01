@@ -4,7 +4,7 @@
    [manifold.deferred :as md]
    [manifold.time :as mt]))
 
-(defn ^:private exponentially
+(defn exponentially
   "Returns a strategy that causes an exponentially increasing wait before
   retrying. The base wait is measured in seconds."
   [wait]
@@ -13,7 +13,7 @@
                   delay-ms (mt/seconds (math/expt wait (count failures)))]
       (mt/in delay-ms #(md/success-deferred ctx)))))
 
-(defn ^:private up-to
+(defn up-to
   "Returns a strategy that allows up to `stop` retries, otherwise
   raises the last exception."
   [stop]
@@ -23,7 +23,7 @@
         ctx
         (throw (last failures))))))
 
-(defn ^:private retry
+(defn retry
   "Retry a function multiple times, pausing for a number of seconds between
   each try.
 

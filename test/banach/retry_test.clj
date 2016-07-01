@@ -8,7 +8,7 @@
 (deftest exponentially-tests
   (testing "wait exponentially as failure count increases"
     (let [c (mt/mock-clock)
-          strategy (#'retry/exponentially 10)
+          strategy (retry/exponentially 10)
           delay-is (fn [delay failures]
                      (let [ctx {:failures failures}
                            d (strategy (md/success-deferred ctx))
@@ -26,13 +26,13 @@
 (deftest up-to-tests
   (testing "raises most recent exception when number of tries exceeded"
     (let [ctx {:failures [(Exception. "earlier") (Exception. "recent")]}
-          strategy (#'retry/up-to 2)]
+          strategy (retry/up-to 2)]
       (is (thrown-with-msg?
            Exception #"recent"
            @(strategy (md/success-deferred ctx))))))
   (testing "returns the ctx when tries remaining"
     (let [ctx {:failures []}
-          strategy (#'retry/up-to 2)]
+          strategy (retry/up-to 2)]
       (is (= ctx @(strategy ctx))))))
 
 (deftest retry-tests
@@ -40,7 +40,7 @@
     (let [called (atom false)
           strategy (fn [ctx] (reset! called true) ctx)
           f #(md/success-deferred :finished)
-          ret (#'retry/retry f strategy)]
+          ret (retry/retry f strategy)]
       (is (not @called))
       (is (= :finished @ret))))
   (testing "retries calling f"
@@ -54,7 +54,7 @@
                        (throw (last failures))))
           f #(md/error-deferred (Exception. "I've failed you"))]
       (mt/with-clock c
-        (let [ret (#'retry/retry f strategy)]
+        (let [ret (retry/retry f strategy)]
           (is (= 1 @attempts))
           (mt/advance c (mt/seconds 1))
           (is (= 2 @attempts))
