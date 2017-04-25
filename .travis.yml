@@ -8,6 +8,7 @@ cache:
 script:
 - lein cljfmt check
 - lein test
+- lein ancient
 after_success:
 - lein cloverage --codecov
 - bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov.json
