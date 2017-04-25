@@ -7,10 +7,13 @@
 (defn exponentially
   "Returns a strategy that causes an exponentially increasing wait before
   retrying. The base wait is measured in seconds."
-  [wait]
+  [base-wait]
   (fn [d]
     (md/let-flow [{:keys [failures] :as ctx} d
-                  delay-ms (mt/seconds (math/expt wait (count failures)))]
+                  delay-ms (->> (count failures)
+                                (math/expt 2)
+                                (* base-wait)
+                                (mt/seconds))]
       (mt/in delay-ms #(md/success-deferred ctx)))))
 
 (defn up-to

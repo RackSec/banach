@@ -19,9 +19,9 @@
                        (mt/advance c 1)
                        (is (md/realized? d))))]
       (mt/with-clock c
-        (delay-is 1 [])
-        (delay-is 10 [:a])
-        (delay-is 1000 [:a :b :c])))))
+        (delay-is (* 10) [])
+        (delay-is (* 10 2) [:a])
+        (delay-is (* 10 2 2 2) [:a :b :c])))))
 
 (deftest up-to-tests
   (testing "raises most recent exception when number of tries exceeded"
@@ -73,10 +73,10 @@
         (let [ret (retry/retry-exp-backoff f p stop)]
           (is (= 1 @attempts))
 
-          (mt/advance c (mt/seconds p))
+          (mt/advance c (mt/seconds (* p 2)))
           (is (= 2 @attempts))
 
-          (mt/advance c (mt/seconds (* p p)))
+          (mt/advance c (mt/seconds (* p 2 2)))
           (is (= 3 @attempts))
           (is (thrown-with-msg? Exception #"explosion" @ret))))))
   (testing "returns success deferred on completion"
