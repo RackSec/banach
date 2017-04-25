@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+## 0.3.0 - 2016-04-25
+
+- Make exponential backoff use the correct base.
+  Issue: https://github.com/RackSec/banach/issues/5
+  PR: https://github.com/RackSec/banach/pull/17
+- Upgrade dependencies
+  Issue: none
+  PR: https://github.com/RackSec/banach/pull/16/files
+
 ## 0.2.0 - 2016-06-23
 
 ### Added
