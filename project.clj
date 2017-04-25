@@ -7,7 +7,7 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [manifold "0.1.6"]
                  [org.clojure/math.numeric-tower "0.0.4"]]
-  :plugins [[lein-cljfmt "0.5.6"]
+  :plugins [[lein-cljfmt "0.3.0"]
             [lein-ancient "0.6.10"]
             [lein-cloverage "1.0.9"]]
   :cljfmt {:indents {let-flow [[:inner 0]]
