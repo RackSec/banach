@@ -5,6 +5,17 @@
             [clojure.math.numeric-tower :as math]
             [banach.retry :as retry]))
 
+(deftest routing-tests
+  (let [strat (retry/routing
+               (comp odd? count :failures) identity
+               (constantly true) retry/give-up)
+        ctx-1 {:failures [(Exception. "first")]}
+        ctx-2 (update ctx-1 :failures conj (Exception. "second"))]
+    (is (= ctx-1 @(strat ctx-1)))
+    (is (thrown-with-msg?
+         Exception #"second"
+         @(strat ctx-2)))))
+
 (deftest give-up-tests
   (let [ctx {:failures [(Exception. "earlier") (Exception. "recent")]}]
     (is (thrown-with-msg?

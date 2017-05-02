@@ -4,6 +4,19 @@
    [manifold.deferred :as md]
    [manifold.time :as mt]))
 
+(defn routing
+  "Returns a strategy that routes to different strategies based on context
+  predicates. Kinda like [[cond]], but for strategies."
+  [& pred-strat-pairs]
+  (fn [d]
+    (md/chain
+     d
+     (fn [{:keys [failures] :as ctx}]
+       (let [strat (first (for [[pred strat] (partition 2 pred-strat-pairs)
+                                :when (pred ctx)]
+                            strat))]
+         (strat ctx))))))
+
 (defn give-up
   "A strategy that just gives up by reraising the most recent exception."
   [d]
