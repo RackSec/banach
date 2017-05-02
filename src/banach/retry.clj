@@ -12,11 +12,11 @@
     (md/chain
      d
      (fn [{:keys [failures] :as ctx}]
-         (if-some [strat (first (for [[pred strat] (partition 2 pred-strat-pairs)
-                                      :when (pred ctx)]
-                                  strat))]
-           (strat ctx)
-           (throw (ex-info "no matching strat to route to" {})))))))
+       (if-some [strat (first (for [[pred strat] (partition 2 pred-strat-pairs)
+                                    :when (pred ctx)]
+                                strat))]
+         (strat ctx)
+         (throw (ex-info "no matching strat to route to" {})))))))
 
 (defn give-up
   "A strategy that just gives up by reraising the most recent exception."
