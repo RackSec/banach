@@ -12,15 +12,30 @@
     (md/chain
      d
      (fn [{:keys [failures] :as ctx}]
-       (let [strat (first (for [[pred strat] (partition 2 pred-strat-pairs)
-                                :when (pred ctx)]
-                            strat))]
-         (strat ctx))))))
+         (if-some [strat (first (for [[pred strat] (partition 2 pred-strat-pairs)
+                                      :when (pred ctx)]
+                                  strat))]
+           (strat ctx)
+           (throw (ex-info "no matching strat to route to" {})))))))
 
 (defn give-up
   "A strategy that just gives up by reraising the most recent exception."
   [d]
   (md/chain d (fn [{:keys [failures]}] (throw (last failures)))))
+
+(defn fatal-ctx
+  "Creates a strategy that bails (throws the most recent exception) if the
+  context shows a fatal state (according to the given predicate)."
+  [is-fatal-ctx?]
+  (routing
+   is-fatal-ctx? give-up
+   (constantly true) identity))
+
+(defn fatal-exception
+  "Creates a strategy that bails (throws the most recent exception) if it
+  matches the given predicate."
+  [is-fatal-exception?]
+  (fatal-ctx (comp is-fatal-exception? last :failures)))
 
 (defn exponentially
   "Returns a strategy that causes an exponentially increasing wait before

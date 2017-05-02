@@ -5,22 +5,39 @@
             [clojure.math.numeric-tower :as math]
             [banach.retry :as retry]))
 
+(def ctx-1 {:failures [(Exception. "Slow your roll")]})
+(def ctx-2 (update ctx-1 :failures conj (Exception. "KABOOM")))
+
 (deftest routing-tests
   (let [strat (retry/routing
                (comp odd? count :failures) identity
-               (constantly true) retry/give-up)
-        ctx-1 {:failures [(Exception. "first")]}
-        ctx-2 (update ctx-1 :failures conj (Exception. "second"))]
+               (constantly true) retry/give-up)]
     (is (= ctx-1 @(strat ctx-1)))
     (is (thrown-with-msg?
-         Exception #"second"
-         @(strat ctx-2)))))
+         Exception #"KABOOM"
+         @(strat ctx-2))))
+
+  (let [strat (retry/routing (constantly false) ::yolo)]
+    (is (thrown-with-msg?
+         Exception #"no matching strat to route to"
+         @(strat ctx-1)))))
 
 (deftest give-up-tests
-  (let [ctx {:failures [(Exception. "earlier") (Exception. "recent")]}]
+  (is (thrown-with-msg?
+       Exception #"KABOOM"
+       @(retry/give-up (md/success-deferred ctx-2)))))
+
+(deftest fatal-ctx-tests
+  (let [strat (retry/fatal-ctx (comp even? count :failures))]
+    (is (= ctx-1 @(strat ctx-1)))
     (is (thrown-with-msg?
-         Exception #"recent"
-         @(retry/give-up (md/success-deferred ctx))))))
+         Exception #"KABOOM"
+         @(strat ctx-2)))))
+
+(deftest fatal-exception-tests
+  (let [strat (retry/fatal-exception #(= "KABOOM" (.getMessage %)))]
+    (is (= ctx-1 @(strat ctx-1)))
+    (is (thrown-with-msg? Exception #"KABOOM" @(strat ctx-2)))))
 
 (deftest exponentially-tests
   (testing "wait exponentially as failure count increases"
