@@ -4,6 +4,11 @@
    [manifold.deferred :as md]
    [manifold.time :as mt]))
 
+(defn give-up
+  "A strategy that just gives up by reraising the most recent exception."
+  [d]
+  (md/chain d (fn [{:keys [failures]}] (throw (last failures)))))
+
 (defn exponentially
   "Returns a strategy that causes an exponentially increasing wait before
   retrying. The base wait is measured in seconds."

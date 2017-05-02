@@ -5,6 +5,12 @@
             [clojure.math.numeric-tower :as math]
             [banach.retry :as retry]))
 
+(deftest give-up-tests
+  (let [ctx {:failures [(Exception. "earlier") (Exception. "recent")]}]
+    (is (thrown-with-msg?
+         Exception #"recent"
+         @(retry/give-up (md/success-deferred ctx))))))
+
 (deftest exponentially-tests
   (testing "wait exponentially as failure count increases"
     (let [c (mt/mock-clock)
