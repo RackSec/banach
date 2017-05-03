@@ -4,6 +4,63 @@
    [manifold.deferred :as md]
    [manifold.time :as mt]))
 
+(defn routing
+  "Returns a strategy that routes to different strategies based on context
+  predicates.
+
+  Takes pairs of predicates and matching strategies. When the returned strategy
+  is used, the predicates will be tried, in order; the context is then passed to
+  the corresponding strategy of the matching predicate. For example:
+
+  ```
+  (routing a? give-up b? (exponentially 3))
+  ```
+
+  ... returns a strategy that when used, if `(a? ctx)` will delegate
+  to [[give-up]], if instead `(b? ctx)` will delegate to that [[exponentially]]
+  strategy, and if neither matches, will (synchronously) raise an exception.
+  Because the resulting strategy will raise if no predicates match, many users
+  will want a `(constantly true)` clause at the end to implement a default
+  fallback strategy for unforeseen exceptions."
+  [& pred-strat-pairs]
+  (fn [d]
+    (md/chain
+     d
+     (fn [{:keys [failures] :as ctx}]
+       (if-some [strat (first (for [[pred strat] (partition 2 pred-strat-pairs)
+                                    :when (pred ctx)]
+                                strat))]
+         (strat ctx)
+         (throw (ex-info "no matching strat to route to" {})))))))
+
+(defn give-up
+  "A strategy that raises the most recent failure in the context."
+  [d]
+  (md/chain d (fn [{:keys [failures]}] (throw (last failures)))))
+
+(defn fatal-ctx
+  "Creates a strategy that bails (throws the most recent exception) if the
+  context shows a fatal state (according to the given predicate).
+
+  See also [[fatal-exception]]; the difference with this function is that that
+  function takes a predicate on the exception instance, whereas this takes a
+  predicate on the context."
+  [is-fatal-ctx?]
+  (routing
+   is-fatal-ctx? give-up
+   (constantly true) identity))
+
+(defn fatal-exception
+  "Creates a strategy that bails (throws the most recent exception) if it
+  matches the given predicate.
+
+  See also [[fatal-ctx]]; the difference with this function is that this
+  function takes a predicate on the exception instance, whereas [[fatal-ctx]]
+  takes a predicate on the context.
+  "
+  [is-fatal-exception?]
+  (fatal-ctx (comp is-fatal-exception? last :failures)))
+
 (defn exponentially
   "Returns a strategy that causes an exponentially increasing wait before
   retrying. The base wait is measured in seconds."
