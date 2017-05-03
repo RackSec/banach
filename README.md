@@ -16,12 +16,12 @@ and hard failures (that stop future retry attempts).
 Minimum viable snippet (with the `banach.retry` namespace aliased as `r`):
 
 ```clojure
-(r/retry f (comp (r/exponentially 2) (r/up-to 5)))
+(r/retry f (comp (r/exponentially 3) (r/up-to 5)))
 ```
 
 ... which will return the result of calling a potentially deferred-returning
 function `f`, retrying on errors, up to 5 times, with an exponential delay
-(starting at 2 seconds, then waiting 2*(2 ^ n)) for each subsequent failure.
+(starting at 3 seconds, then waiting 3*(2 ^ n)) for each subsequent failure.
 
 Maybe you know that a particular exception means you should stop trying, e.g.
 because of an access control misconfiguration:
