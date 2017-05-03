@@ -38,18 +38,17 @@ because of an access control misconfiguration:
 you wouldn't want to potentially back off for some number of seconds for an
 exception you know you'll never recover from anyway.)
 
-Deep down, this functionality is build on a concept called "strategies", which
+Deep down, this functionality is built on a concept called "strategies", which
 take a (potentially deferred) context and return a (potentially deferred)
-context. Because they're deferred, and because the context is a general,
-extensible map, this lets you implement pretty much any retry strategy you want
-in a composable way. By default, contexts contain a vector of failures
-(exceptions) encountered so far. So, for example, if you knew that seeing one
-particular exception after another particular exception warranted special
-behavior, you can easily do that, too.
+context. Because a context is a (deferred) extensible map this lets you
+implement pretty much any retry strategy you want in a composable way. By
+default, contexts contain a vector of failures (exceptions) encountered so far.
+So, for example, if you knew that seeing one particular exception after another
+particular exception warranted special behavior, you can easily do that, too.
 
-Other fns you may want to check out: `fatal-ctx` (like `fatal-exception` but
-takes a predicate on the context instead of the most recent exception),
-`routing` (conditionally delegate to different strategies), and pretty much the
+Other functions you may want to check out: `fatal-ctx` (like `fatal-exception`
+but takes a predicate on the context instead of the most recent exception
+`routing` (conditionally delegate to different strategies),), and pretty much the
 entire `banach.retry` namespace.
 
 ## License
